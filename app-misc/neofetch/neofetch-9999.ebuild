@@ -19,7 +19,10 @@ fi
 
 LICENSE="MIT"
 SLOT="0"
-IUSE="images"
+IUSE="images music resolution"
 
 DEPEND="app-shells/bash"
-RDEPEND="${DEPEND} images? ( www-client/w3m[imlib,fbcon] )"
+RDEPEND="${DEPEND} 
+		images? ( www-client/w3m[imlib,fbcon] )
+		music? ( || ( media-sound/cmus media-sound/mpd media-sound/moc ) )
+		resolution? ( || ( x11-apps/xrandr x11-apps/dpyinfo ) )"
