@@ -1,0 +1,89 @@
+Upstream: no
+
+From 5ab65bd390c7e84283b02d53e282d7565f072ac2 Mon Sep 17 00:00:00 2001
+From: Heiko Becker <heirecka@exherbo.org>
+Date: Mon, 25 May 2015 23:57:36 +0200
+Subject: [PATCH] Fix build with libressl
+
+Change-Id: I79447f82e6ab859ea98c8467bcd93d685755f18d
+---
+ src/network/ssl/qsslcontext_openssl.cpp        | 2 +-
+ src/network/ssl/qsslellipticcurve_openssl.cpp  | 2 +-
+ src/network/ssl/qsslsocket_openssl.cpp         | 2 +-
+ src/network/ssl/qsslsocket_openssl_symbols.cpp | 2 +-
+ src/network/ssl/qsslsocket_openssl_symbols_p.h | 4 ++--
+ 5 files changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/src/network/ssl/qsslcontext_openssl.cpp b/src/network/ssl/qsslcontext_openssl.cpp
+index f132d02..c900bbd 100644
+--- a/src/network/ssl/qsslcontext_openssl.cpp
++++ b/src/network/ssl/qsslcontext_openssl.cpp
+@@ -347,7 +347,7 @@ init_context:
+ 
+     const QVector<QSslEllipticCurve> qcurves = sslContext->sslConfiguration.ellipticCurves();
+     if (!qcurves.isEmpty()) {
+-#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(OPENSSL_NO_EC)
++#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(OPENSSL_NO_EC) && !defined(LIBRESSL_VERSION_NUMBER)
+         // Set the curves to be used
+         if (q_SSLeay() >= 0x10002000L) {
+             // SSL_CTX_ctrl wants a non-const pointer as last argument,
+diff --git a/src/network/ssl/qsslellipticcurve_openssl.cpp b/src/network/ssl/qsslellipticcurve_openssl.cpp
+index e18197b..743bf8e 100644
+--- a/src/network/ssl/qsslellipticcurve_openssl.cpp
++++ b/src/network/ssl/qsslellipticcurve_openssl.cpp
+@@ -82,7 +82,7 @@ QSslEllipticCurve QSslEllipticCurve::fromShortName(const QString &name)
+ 
+     int nid = q_OBJ_sn2nid(curveNameLatin1.data());
+ 
+-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
++#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
+     if (nid == 0 && q_SSLeay() >= 0x10002000L)
+         nid = q_EC_curve_nist2nid(curveNameLatin1.data());
+ #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+diff --git a/src/network/ssl/qsslsocket_openssl.cpp b/src/network/ssl/qsslsocket_openssl.cpp
+index c6d63ad..2b8b3b5 100644
+--- a/src/network/ssl/qsslsocket_openssl.cpp
++++ b/src/network/ssl/qsslsocket_openssl.cpp
+@@ -1578,7 +1578,7 @@ void QSslSocketBackendPrivate::continueHandshake()
+     }
+ #endif // OPENSSL_VERSION_NUMBER >= 0x1000100fL ...
+ 
+-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
++#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
+     if (q_SSLeay() >= 0x10002000L && mode == QSslSocket::SslClientMode) {
+         EVP_PKEY *key;
+         if (q_SSL_get_server_tmp_key(ssl, &key))
+diff --git a/src/network/ssl/qsslsocket_openssl_symbols.cpp b/src/network/ssl/qsslsocket_openssl_symbols.cpp
+index d420f78..5834cd5 100644
+--- a/src/network/ssl/qsslsocket_openssl_symbols.cpp
++++ b/src/network/ssl/qsslsocket_openssl_symbols.cpp
+@@ -428,7 +428,7 @@ DEFINEFUNC(EC_KEY *, EC_KEY_dup, const EC_KEY *ec, ec, return 0, return)
+ DEFINEFUNC(EC_KEY *, EC_KEY_new_by_curve_name, int nid, nid, return 0, return)
+ DEFINEFUNC(void, EC_KEY_free, EC_KEY *ecdh, ecdh, return, DUMMYARG)
+ DEFINEFUNC2(size_t, EC_get_builtin_curves, EC_builtin_curve * r, r, size_t nitems, nitems, return 0, return)
+-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
++#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
+ DEFINEFUNC(int, EC_curve_nist2nid, const char *name, name, return 0, return)
+ #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+ #endif // OPENSSL_NO_EC
+diff --git a/src/network/ssl/qsslsocket_openssl_symbols_p.h b/src/network/ssl/qsslsocket_openssl_symbols_p.h
+index 36e041b..7e11b79 100644
+--- a/src/network/ssl/qsslsocket_openssl_symbols_p.h
++++ b/src/network/ssl/qsslsocket_openssl_symbols_p.h
+@@ -485,11 +485,11 @@ void q_EC_KEY_free(EC_KEY *ecdh);
+ 
+ // EC curves management
+ size_t q_EC_get_builtin_curves(EC_builtin_curve *r, size_t nitems);
+-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
++#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
+ int q_EC_curve_nist2nid(const char *name);
+ #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+ #endif // OPENSSL_NO_EC
+-#if OPENSSL_VERSION_NUMBER >= 0x10002000L
++#if OPENSSL_VERSION_NUMBER >= 0x10002000L && !defined(LIBRESSL_VERSION_NUMBER)
+ #define q_SSL_get_server_tmp_key(ssl, key) q_SSL_ctrl((ssl), SSL_CTRL_GET_SERVER_TMP_KEY, 0, (char *)key)
+ #endif // OPENSSL_VERSION_NUMBER >= 0x10002000L
+ 
+-- 
+2.8.4
+
