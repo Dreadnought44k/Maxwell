@@ -1,0 +1,13 @@
+# Copyright 1999-2016 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+# For neofetch 
+images - use www-client/w3m with imlib2 and fbcon flags to display user defined images
+music - use media-sound/mpd media-sound/cmus or media-sound/moc to display currently playing song
+resolution - use x11-apps/xrandr (preferable) or x11-apps/xdpyinfo to display resolution and screen refresh rate info
+
+# For libressl (taken from libressl gentoo overlay
+libressl - Use dev-libs/libressl as SSL provider (might need ssl USE flag), packages should not depend on this USE flag
+
+
